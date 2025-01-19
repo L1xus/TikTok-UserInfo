@@ -38,11 +38,9 @@ def get_user_info(identifier):
                     signature = user.get("signature", "No biography found")
                     verified = user.get("verified", "No verified status found")
                     secUid = user.get("secUid", "No secUid found")
-                    commentSetting = user.get("commentSetting", "No comment setting found")
                     privateAccount = user.get("privateAccount", "No private account status found")
                     region = user.get("region", "No region found")
                     heart = stats.get("heart", "No heart count found")
-                    diggCount = stats.get("diggCount", "No digg count found")
                     friendCount = stats.get("friendCount", "No friend count found")
                     profile_pic = user.get("avatarLarger", "No profile picture found").replace('\\u002F', '/')
 
@@ -50,6 +48,7 @@ def get_user_info(identifier):
                     print(f"User ID: {user_id}")
                     print(f"Username: {unique_id}")
                     print(f"Nickname: {nickname}")
+                    print(f"Region: {region}")
                     print(f"Followers: {followers}")
                     print(f"Following: {following}")
                     print(f"Likes: {likes}")
@@ -57,21 +56,19 @@ def get_user_info(identifier):
                     print(f"Biography: {signature}")
                     print(f"Verified: {verified}")
                     print(f"SecUid: {secUid}")
-                    print(f"Comment Setting: {commentSetting}")
                     print(f"Private Account: {privateAccount}")
-                    print(f"Region: {region}")
                     print(f"Heart: {heart}")
-                    print(f"Digg Count: {diggCount}")
                     print(f"Friend Count: {friendCount}")
                     print(f"Profile Picture URL: {profile_pic}")
 
                 except json.JSONDecodeError as e:
                     print(f"JSON decoding error: {e}")
             else:
-                print("Could not extract user data from script.")
+                print("Could not extract user data from the script!")
         else:
-            print("User data script not found in page.")
+            print("User data script not found in page!")
     else:
         print(f"Error: Unable to fetch page. Status code: {response.status_code}")
 
-get_user_info("khaby.lame")
+# get_user_info("khaby.lame")
+get_user_info("youneszarou")
