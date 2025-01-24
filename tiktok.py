@@ -1,74 +1,54 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
+from selenium.common import TimeoutException
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+
 from bs4 import BeautifulSoup
-import re
-import json
 
-def get_user_info(identifier):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Win 64 ; x64) Apple WeKit /537.36(KHTML , like Gecko) Chrome/80.0.3987.162 Safari/537.36"
-    }
-    url = f"https://www.tiktok.com/@{identifier}"
-    response = requests.get(url, headers=headers)
+from datetime import datetime
+import time
+start_time = datetime.now()
 
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, "html.parser")
+def get_comments_html(reel):
+    options = Options()
+    options.add_argument("--headless")
+    browser = webdriver.Firefox(options=options)
+    browser.maximize_window()
+    browser.set_window_size(1920, 1080)
+    wait = WebDriverWait(browser, 30)
+    comments = []
+
+    try:
+        print(reel)
+        browser.get(reel)
+
+        try:
+            wait.until(EC.visibility_of_all_elements_located(
+                (By.XPATH, "//div[contains(@class, 'css-1npmxy5-DivActionItemContainer er2ywmz0')]")
+            ))
+            try:
+                comments_button = wait.until(EC.element_to_be_clickable(
+                    (By.XPATH, "/html/body/div[1]/div[2]/div[2]/div/div[2]/div[1]/div[1]/div[1]/div[4]/div[2]/button[2]")
+                ))
+                browser.execute_script("arguments[0].scrollIntoView(true);", comments_button)
+                browser.execute_script("arguments[0].click()", comments_button)
+                print(comments_button.text)
+                print("Clicked on the comments button.")
+            except TimeoutException:
+                print("Comments button not found or not clickable.")
+
+        except TimeoutException:
+            pass
+
+    finally:
+        browser.quit()
         
-        script_tag = soup.find("script", string=re.compile("webapp.user-detail"))
-        if script_tag:
-            script_content = script_tag.string
-            
-            match = re.search(r'webapp\.user-detail":({.*?}),\s*"webapp', script_content)
-            if match:
-                user_data_json = match.group(1)
-                
-                try:
-                    user_data = json.loads(user_data_json)
-                    
-                    user_info = user_data.get("userInfo", {})
-                    user = user_info.get("user", {})
-                    stats = user_info.get("stats", {})
+    return comments
 
-                    user_id = user.get("id", "No ID found")
-                    unique_id = user.get("uniqueId", "No unique ID found")
-                    nickname = user.get("nickname", "No nickname found")
-                    followers = stats.get("followerCount", "No followers count found")
-                    following = stats.get("followingCount", "No following count found")
-                    likes = stats.get("heartCount", "No likes count found")
-                    videos = stats.get("videoCount", "No videos count found")
-                    signature = user.get("signature", "No biography found")
-                    verified = user.get("verified", "No verified status found")
-                    secUid = user.get("secUid", "No secUid found")
-                    privateAccount = user.get("privateAccount", "No private account status found")
-                    region = user.get("region", "No region found")
-                    heart = stats.get("heart", "No heart count found")
-                    friendCount = stats.get("friendCount", "No friend count found")
-                    profile_pic = user.get("avatarLarger", "No profile picture found").replace('\\u002F', '/')
+test = get_comments_html('https://www.tiktok.com/@hidiralikaya/video/7246476904365133062')
+print(test)
 
-                    print("User Information:")
-                    print(f"User ID: {user_id}")
-                    print(f"Username: {unique_id}")
-                    print(f"Nickname: {nickname}")
-                    print(f"Region: {region}")
-                    print(f"Followers: {followers}")
-                    print(f"Following: {following}")
-                    print(f"Likes: {likes}")
-                    print(f"Videos: {videos}")
-                    print(f"Biography: {signature}")
-                    print(f"Verified: {verified}")
-                    print(f"SecUid: {secUid}")
-                    print(f"Private Account: {privateAccount}")
-                    print(f"Heart: {heart}")
-                    print(f"Friend Count: {friendCount}")
-                    print(f"Profile Picture URL: {profile_pic}")
-
-                except json.JSONDecodeError as e:
-                    print(f"JSON decoding error: {e}")
-            else:
-                print("Could not extract user data from the script!")
-        else:
-            print("User data script not found in page!")
-    else:
-        print(f"Error: Unable to fetch page. Status code: {response.status_code}")
-
-# get_user_info("khaby.lame")
-get_user_info("youneszarou")
+end_time = datetime.now()
+print('Duration: {}'.format(end_time - start_time))

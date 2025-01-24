@@ -6,4 +6,4 @@ services:
       - "4000:80"
     volumes:
       - .:/app
-    command: python tiktok.py
+    command: python user_info.py
